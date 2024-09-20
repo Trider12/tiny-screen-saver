@@ -1,10 +1,10 @@
 # Tiny screen saver
 https://github.com/user-attachments/assets/23629fee-a9f5-44fa-85e0-4246ba02ef9e
 ### About
-The goal of this project was to write a fully functional Windows screen saver in around 1024 bytes. The current size is **1293** bytes.\
+The goal of this project was to write a fully functional Windows screen saver (including preview and settings) in around 1024 bytes. The current size is **1293** bytes.\
 The screen saver implements a 2D [Cyclic cellular automaton](https://en.wikipedia.org/wiki/Cyclic_cellular_automaton) using the first 16 colors of the default Windows color palette.\
 \
-**WARNING:** the screen saver executable can trigger antiviruses due to cempression.
+**WARNING:** the screen saver executable can trigger antiviruses due to compression.
 ### Building
 Open the project in Visual Studio.\
 \
