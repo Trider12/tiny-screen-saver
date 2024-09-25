@@ -5,22 +5,23 @@
 #include <ntsecapi.h>
 #include "dialog.h"
 
-#define BRUSH_COUNT 16 // must be a power of two
-#define DEF_TILE_SIZE 20
+#define NAMEOF(var) #var
+
 #define APP_NAME "tss.scr"
-#define TILE_SIZE_NAME "tileSize"
+#define BRUSH_COUNT 16 // must be a power of two
+#define DEFAULT_TILE_SIZE 20
 #define TIMER_DELTA_MS 50
 
 int srcWindowWidth;
 int srcWindowHeight;
 int dstWindowWidth;
 int dstWindowHeight;
-int gridSizeX;
-int gridSizeY;
+unsigned int gridSizeX;
+unsigned int gridSizeY;
 int tileSize;
 int tileCount;
 char *tiles;
-char index; // 0 or 1
+unsigned int bufferIndex; // 0 or 1
 
 HDC windowHdc;
 HDC drawHdc;
@@ -31,15 +32,15 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_TIMER:
-        char *readBuffer = tiles + index * tileCount;
-        index ^= 1;
-        char *writeBuffer = tiles + index * tileCount;
+        char *readBuffer = tiles + bufferIndex * tileCount;
+        bufferIndex ^= 1;
+        char *writeBuffer = tiles + bufferIndex * tileCount;
 
-        for (int i = 0; i < gridSizeY; i++)
+        for (unsigned int i = 0; i < gridSizeY; i++)
         {
-            for (int j = 0; j < gridSizeX; j++)
+            for (unsigned int j = 0; j < gridSizeX; j++)
             {
-                int curr = i * gridSizeX + j;
+                unsigned int curr = i * gridSizeX + j;
                 char srcColor = readBuffer[curr] & (BRUSH_COUNT - 1);
                 char nextColor = (srcColor + 1) & (BRUSH_COUNT - 1);
                 char count = 0;
@@ -48,7 +49,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        int neighbour = ((i + k) % gridSizeY) * gridSizeX + (j + l) % gridSizeX;
+                        unsigned int neighbour = ((gridSizeY + i + k) % gridSizeY) * gridSizeX + (gridSizeX + j + l) % gridSizeX;
                         count += readBuffer[neighbour] == nextColor;
                     }
                 }
@@ -108,7 +109,7 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDOK:
             char buffer[3]; // two digit number and 0
             wnsprintfA(buffer, sizeof(buffer), "%d", tileSize);
-            WriteProfileStringA(APP_NAME, TILE_SIZE_NAME, buffer);
+            WriteProfileStringA(APP_NAME, NAMEOF(tileSize), buffer);
         case IDCANCEL:
             EndDialog(hWnd, wParam);
             break;
@@ -122,7 +123,7 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 int main()
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
-    tileSize = GetProfileIntA(APP_NAME, TILE_SIZE_NAME, DEF_TILE_SIZE);
+    tileSize = GetProfileIntA(APP_NAME, NAMEOF(tileSize), DEFAULT_TILE_SIZE);
 
     int argc;
     WCHAR **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
